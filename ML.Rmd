@@ -1,0 +1,82 @@
+---
+title: "Machine Learning Course Project"
+author: "Diego Costa"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, cache = TRUE)
+```
+
+##Introduction
+
+Human activity recognition is a thriving area of research. Machine learning can be used to classify and predict various types of exercises. 
+
+Information for this project was obtained from the investigation by 
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H.: Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+Data was collected from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). 
+
+The objective is to create a model that can predict the correct classification, based on new data.
+
+##Necessary packages uploading
+
+```{r}
+library(caret)
+library(parallel)
+library(doParallel)
+```
+
+##Data reading
+
+```{r}
+train <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+test <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+```
+
+##Improving Performance
+
+Computational time can be very prolongued in a PC. To improve processing time of the multiple executions of the train() function, parallel processing can come in handy. Also reducing the quantity of folds for k-fold cross-validation from the defauly 25 to 5 can save a lot of computing time, without significantly afffecting the model accuracy. 
+
+```{r}
+cluster <- makeCluster(detectCores() - 1)
+registerDoParallel(cluster)
+fitControl <- trainControl(method = "cv",
+                           number = 5,
+                           allowParallel = TRUE)
+```
+
+##Modelling
+
+Finally, the model can be contructed in a reasonable amount of time. 
+The identifier and time-related variables can be disregardes, as well as suumary variables such as averages, minimums, standard deviations, etc. They would provide little unique information, and thay also contain a lot of missing values, that impair the modelling. Raw data from pitch, roll and yaw movements from the sensors was used. 
+Random forests was selected due to is very high accuracy (it should be very high to be able to predict the 20 quiz problems and get over %80 correct).
+
+```{r}
+mod <- train(classe ~ pitch_arm + pitch_forearm + pitch_dumbbell + pitch_belt + roll_arm + roll_forearm + roll_dumbbell + roll_belt + yaw_arm + yaw_forearm + yaw_dumbbell + yaw_belt, data = train, trControl = fitControl)
+```
+
+After processing the data, we explicitly shut down the cluster.
+
+```{r}
+stopCluster(cluster)
+registerDoSEQ()
+```
+
+##Internal validation
+
+We can now perform some validation using the trainig set.
+
+```{r}
+mod
+mod$resample
+confusionMatrix.train(mod)
+```
+
+Accuracy is close to 0.99, resulting in an excellent model that can be now tested. 
+Quiz prediction accuracy was 100% :-)
+
+Thanks for reviewing my project.
+
+```{r}
+```
