@@ -1,4 +1,4 @@
-# Machine_Learning
+# Machine Learning
 Course Project
 
 HTML Preview:
