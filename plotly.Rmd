@@ -1,0 +1,22 @@
+---
+title: "Orange trees"
+author: "Diego Costa"
+date: "June 30, 2019"
+output: ioslides_presentation
+---
+
+##How circumference of 5 orange trees increases with age.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+data(Orange)
+library(plotly)
+plot_ly(x = Orange$age, y = Orange$circumference, z = Orange$Tree, data = Orange, mode = "scatter3d", color = Orange$Tree) %>%
+     add_markers() %>%
+     layout(scene = list(xaxis = list(title = 'Age (days)'),
+                         yaxis = list(title = 'Circumference (mm)'),
+                         zaxis = list(title = 'Tree number')))
+```
